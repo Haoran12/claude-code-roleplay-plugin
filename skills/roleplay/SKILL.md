@@ -148,9 +148,16 @@ Agent Prompt 结构：
 - 不披露 GodOnly 知识
 - 输出 `used_fact_ids` 用于验证
 
-### Step 7: 更新状态
+### Step 7: 记录事件与更新状态
 
-更新 `runtime.yaml`，记录事件与状态变更。
+**事件记录**：
+- 在 `records/` 目录下创建事件记录文件
+- 文件命名：`{YYYYMMDD}_{HHmmss}_{场景关键字}.yaml`
+- 记录：时间戳、参与角色、事件摘要、各角色行动、叙事文本
+
+**状态更新**：
+- 更新 `runtime.yaml` 中的场景与角色状态
+- 不在 `runtime.yaml` 中存储详细事件历史
 
 ---
 

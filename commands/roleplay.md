@@ -129,9 +129,36 @@ Agent Prompt 结构：
 - 不披露 GodOnly 知识
 - 输出 `used_fact_ids` 用于验证
 
-### Phase 8: 更新状态
+### Phase 8: 记录事件与更新状态
 
-更新 `runtime.yaml`，记录事件与状态变更。
+**事件记录**：
+- 在 `records/` 目录下创建事件记录文件
+- 文件命名格式：`{YYYYMMDD}_{HHmmss}_{场景关键字}.yaml`
+- 记录内容示例：
+
+```yaml
+timestamp: "1003-07-17T14:30"
+scene: "洞庭湖畔"
+summary: "许宁发现孤女，决定收留"
+participants:
+  - "许宁"
+  - "沈烟"
+  - "孤女"
+events:
+  - actor: "许宁"
+    action: "发现女童，上前查看"
+    outcome: "发现蝴蝶印记，决定带走"
+  - actor: "沈烟"
+    action: "观察师父举动"
+    outcome: "好奇但不发问"
+narrative_text: |
+  {生成的叙事文本}
+```
+
+**状态更新**：
+- 更新 `runtime.yaml` 中的 `current_scene` 状态
+- 更新 `present_characters` 的位置、活动、状态
+- 不在 `runtime.yaml` 中存储详细事件历史
 
 ---
 
