@@ -47,10 +47,28 @@ Narrative Text（叙事文本）
 ### Step 1: 加载 L1 真相
 
 读取项目中的状态文件：
-- `runtime.yaml` → 当前场景
+- `runtime.yaml` → 当前场景（工作目录根目录）
 - `characters/*.yaml` → 角色定义
-- `world_base.yaml` → 世界设定（含 GodOnly 知识）
-- `Arguments.yaml` → 档位定义
+- `worldview/*.yaml` → 世界总体设定和大事件记录
+- `location_and_faction/*.yaml` → 地区和势力设定
+- `others/*.yaml` → 其他设定文件
+- `records/*.yaml` → 历史事件记录
+
+**目录结构约定**：
+```
+项目根目录/
+├── runtime.yaml           # 当前运行状态（必需）
+├── characters/            # 角色定义（必需）
+│   └── *.yaml
+├── worldview/             # 世界总体设定和大事件
+│   └── *.yaml
+├── location_and_faction/  # 地区和势力设定
+│   └── *.yaml
+├── others/                # 其他设定文件
+│   └── *.yaml
+└── records/               # 历史事件记录
+    └── *.yaml
+```
 
 ### Step 1.5: 环境推断与初始化
 
