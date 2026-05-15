@@ -15,6 +15,114 @@ $ARGUMENTS
 
 ## 执行流程
 
+### Phase 0: 确定性数值计算（必须调用脚本）
+
+**重要：以下计算必须使用脚本，避免 LLM 误算。**
+
+#### 0.1 获取场景上下文
+
+**触发时机**：每次执行 roleplay 命令时，首先调用。
+
+```bash
+python3 {插件目录}/scripts/rp_workflow.py scene
+```
+
+输出包含：
+- 当前日期、位置
+- 在场角色的年龄、档位摘要
+- 特殊事件（生日、纪念日）
+- 项目目录结构
+
+**使用场景**：
+- 需要知道当前日期时
+- 需要确认在场角色时
+- 需要快速了解角色档位时
+
+#### 0.2 日期计算
+
+**触发时机**：
+- 需要计算角色年龄时
+- 需要判断是否生日/纪念日时
+- 需要计算时间跨度时
+
+```bash
+# 日期差计算
+python3 {插件目录}/scripts/rp_calc.py date "开始日期" "结束日期"
+
+# 示例
+python3 {插件目录}/scripts/rp_calc.py date "371-03-22" "1003-07-14"
+# 输出: {"years": 632, "months": 3, ...}
+```
+
+支持的日期格式：
+- 标准格式：`1003-07-15`
+- 短年份：`371-03-22`（自动补全）
+- BC 日期：`BC 1288-02-02`
+
+#### 0.3 档位计算
+
+**触发时机**：
+- 需要将数值转换为档位描述时
+- 需要比较两个角色属性差距时
+- 需要在 L2 视图中描述角色能力时
+
+```bash
+# 单个数值档位
+python3 {插件目录}/scripts/rp_calc.py tier 1550
+# 输出: {"tier": "Adept", "description": "中坚力量...", ...}
+
+# 两个数值差距
+python3 {插件目录}/scripts/rp_calc.py delta 1550 800
+# 输出: {"delta": 750, "delta_description": "差距较大", "tier_gap": 1, ...}
+```
+
+#### 0.4 角色信息格式化
+
+**触发时机**：
+- 为 L2 视图准备角色信息时
+- 需要角色的档位描述时
+
+```bash
+python3 {插件目录}/scripts/rp_workflow.py l2 "角色名"
+# 示例
+python3 {插件目录}/scripts/rp_workflow.py l2 "孟缘"
+```
+
+输出：
+```json
+{
+  "character": "孟缘",
+  "age_description": "582岁 (枝叶成灵)",
+  "tier_descriptions": {
+    "physique": "Adept 级别",
+    "mana_power": "Master 级别",
+    ...
+  }
+}
+```
+
+#### 0.5 角色比较
+
+**触发时机**：
+- 需要比较两个角色实力时
+- 战斗/对抗场景评估时
+
+```bash
+python3 {插件目录}/scripts/rp_character.py compare <角色1.yaml> <角色2.yaml>
+```
+
+#### 缓存管理
+
+**触发时机**：
+- 档位配置文件更新后
+- 会话开始时自动清除旧缓存
+
+```bash
+python3 {插件目录}/scripts/rp_calc.py clear-cache
+```
+
+---
+
 ### Phase 1: 加载状态（L1 真相）
 
 读取项目中的状态文件：
@@ -163,6 +271,11 @@ environment:
 
 从 `runtime.yaml` 的 `present_characters` 提取在场角色列表。
 
+**使用脚本获取角色详细信息**：
+```bash
+python3 {插件目录}/scripts/rp_workflow.py l2 "角色名"
+```
+
 ---
 
 ### Phase 3: 派生 L2 视图（信息隔离核心）
@@ -232,7 +345,7 @@ filtered_scene:
     - {过滤掉感官失能/环境遮挡的感知}
 
   embodiment_state:
-    senses: {档位描述}
+    senses: {档位描述 - 使用脚本计算}
     physical: {身体状态}
 
   prior_subjective_state:
@@ -246,7 +359,7 @@ filtered_scene:
 **过滤规则**：
 - `access: "God Only"` → 不进入任何 L2
 - `access: "Condition: 修行者"` → 只进入修行者角色的 L2
-- 数值 → 档位（如 1550 → "Adept 级别"）
+- 数值 → 档位（**使用脚本计算**，如 1550 → "Adept 级别"）
 
 **体感档位翻译表**：
 
@@ -284,6 +397,7 @@ Agent Prompt 结构：
 
 ## 角色身份
 {角色名称、定位、心智模型}
+{年龄描述 - 使用脚本计算}
 
 ## 你能感知的
 {L2.filtered_scene}
@@ -293,6 +407,7 @@ Agent Prompt 结构：
 
 ## 你的身体状态
 {L2.embodiment_state}
+{档位描述 - 使用脚本计算}
 
 ## 当前情境
 {用户输入或场景描述}
@@ -425,12 +540,40 @@ narrative_text: |
 
 ---
 
+## 脚本调用总结
+
+| 场景 | 脚本命令 | 输出 |
+|------|----------|------|
+| 获取场景上下文 | `rp_workflow.py scene` | 日期、位置、角色信息、特殊事件 |
+| 日期计算 | `rp_calc.py date "开始" "结束"` | 年份差、是否生日 |
+| 档位计算 | `rp_calc.py tier 数值` | 档位名称、描述 |
+| 差距计算 | `rp_calc.py delta 数值1 数值2` | 差距描述、档位间隔 |
+| L2 视图格式化 | `rp_workflow.py l2 "角色名"` | 年龄描述、档位描述 |
+| 角色比较 | `rp_character.py compare 文件1 文件2` | 属性对比、整体评估 |
+| 清除缓存 | `rp_calc.py clear-cache` | 无输出 |
+
+**脚本位置**：`{插件目录}/scripts/`
+
+---
+
 ## 数值档位翻译
 
+**使用脚本动态计算，档位定义来自 `worldview/Arguments.yaml`**
+
+默认档位范围（仅供参考，实际使用脚本计算）：
 | 范围 | 档位 |
 |------|------|
 | 0-200 | Mundane |
 | 200-1000 | Apprentice |
 | 1000-1800 | Adept |
 | 1800-2600 | Master |
-| 2600+ | Ascendant |
+| 2600-6000 | Ascendant |
+| 6000+ | Transcendent |
+
+差距档位：
+| 范围 | 描述 |
+|------|------|
+| 0-150 | 难分高下 |
+| 150-400 | 有明显差距，可弥补 |
+| 400-1000 | 差距较大，难以弥补 |
+| 1000+ | 碾压 |
