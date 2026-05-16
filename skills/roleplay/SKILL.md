@@ -50,6 +50,7 @@ Narrative Text（叙事文本）
 - `runtime.yaml` → 当前场景（工作目录根目录）
 - `characters/*.yaml` → 角色定义
 - `worldview/*.yaml` → 世界总体设定和大事件记录
+- `social/*.yaml` → 制度、风俗、文化现象等社会设定
 - `location_and_faction/*.yaml` → 地区和势力设定
 - `others/*.yaml` → 其他设定文件
 - `records/*.yaml` → 历史事件记录
@@ -61,6 +62,8 @@ Narrative Text（叙事文本）
 ├── characters/            # 角色定义（必需）
 │   └── *.yaml
 ├── worldview/             # 世界总体设定和大事件
+│   └── *.yaml
+├── social/                # 制度、风俗、文化现象
 │   └── *.yaml
 ├── location_and_faction/  # 地区和势力设定
 │   └── *.yaml

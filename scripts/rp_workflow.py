@@ -51,6 +51,7 @@ def find_project_structure() -> Dict[str, str]:
         "runtime_path": None,
         "characters_dir": None,
         "config_path": None,
+        "social_dir": None,
         "base_dir": None
     }
 
@@ -61,14 +62,16 @@ def find_project_structure() -> Dict[str, str]:
             "base_dir": "xdworld",
             "runtime": "xdworld/runtime.yaml",
             "characters": "xdworld/characters",
-            "config": "xdworld/worldview/Arguments.yaml"
+            "config": "xdworld/worldview/Arguments.yaml",
+            "social": "xdworld/social"
         },
         # 结构2: 项目根目录
         {
             "base_dir": ".",
             "runtime": "runtime.yaml",
             "characters": "characters",
-            "config": "worldview/Arguments.yaml"
+            "config": "worldview/Arguments.yaml",
+            "social": "social"
         }
     ]
 
@@ -79,6 +82,7 @@ def find_project_structure() -> Dict[str, str]:
             result["characters_dir"] = structure["characters"]
             if os.path.exists(structure["config"]):
                 result["config_path"] = structure["config"]
+            result["social_dir"] = structure.get("social")
             break
 
     return result
